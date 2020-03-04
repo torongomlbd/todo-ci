@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo installing yarn
+      - npm i -g yarn
+      - echo Installing node modules
+      - yarn install
+  build:
+    commands:
+      - echo Build started on `date`
+      - node_modules/.bin/ng build --configuration=$ENV --prod --aot=true
+      - echo Clearing S3 bucket
+      - aws s3 rm s3://$S3_BUCKET --recursive
+      - echo Uploading new build to S3 bucket
+      - aws s3 sync dist/todo/ s3://$S3_BUCKET --acl public-read
+  post_build:
+    commands:
+      - echo Build completed on `date`
